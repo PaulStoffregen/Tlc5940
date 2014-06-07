@@ -1,0 +1,48 @@
+2009-05-07
+    - Added support for the Arduino Mega
+
+2009-04-19
+    - Bug fix in tlc_fades.h (incrementing a pointer after removing something
+        from the fadeBuffer array).  Also tlc_updateFades() will wait till after
+        an update if it's just removed the last fade.
+    - Updated the core function documentation.
+
+2009-03-05
+    - Fixed the missing pin definitions for the ATmega328p
+
+2009-02-16
+    - Added tlc_servos.h and example (thank you Steve Pomeroy)
+    - Cleaned up some older documentation
+    - Added trailing newlines to c, h, cpp, and pde files
+
+2009-02-03
+    - Added support for the Sanguino (ATmega xx4 series)
+    - Added support for the ATmega 8
+    - Moved the project to Google Code:
+        http://code.google.com/p/tlc5940arduino/
+    - Fixed a bug in tlc_fades.h: assignment of struct arrays
+    - Cleaned up the whitespace in the library: 4 spaces instead of tabs
+
+2009-01-25
+    - Added tlc_fades.h
+    - Added include "tlc_config.h" to Tlc5940.h so it's not required
+        in the sketch
+    - Added Tlc.setAll(value)
+    - Changed a few for loops in Tlc5940.cpp: used *p++ instead of having
+        p++ in the increment section of the for loop; changed to while loops
+
+2008-11-26
+    - Tlc.init() sets all channels to zero and updates.
+    - Added TLC_PWM_PERIOD and TLC_GSCLK_PERIOD to tlc_config.h
+    - Added TLC_CHANNEL_TYPE to tlc_config.h - Adds support for up to 4096 TLCs.
+                                               (if TLC_CHANNEL_TYPE is uint16_t)
+    - Changed the examples to use TLC_CHANNEL_TYPE
+    - set DATA_TRANSFER_MODE default to TLC_SPI
+
+2008-11-11
+    - Added tlc_animations.h and examples
+    - Fixed SPI mode - (don't use enums as constants
+                        "#if A == 1" doesn't work)
+
+2008-10-31
+    - Initial Release

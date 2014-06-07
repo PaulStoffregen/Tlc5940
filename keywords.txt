@@ -1,0 +1,46 @@
+#######################################
+# Syntax Coloring Map For TLC5940
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Tlc5940         KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+init            KEYWORD2
+clear           KEYWORD2
+update          KEYWORD2
+set             KEYWORD2
+get             KEYWORD2
+setAll          KEYWORD2
+setAllDC        KEYWORD2
+readXERR        KEYWORD2
+tlc_setGSfromProgmem    KEYWORD2
+tlc_setDCfromProgmem    KEYWORD2
+tlc_playAnimation       KEYWORD2
+tlc_addFade             KEYWORD2
+tlc_removeFade          KEYWORD2
+tlc_shiftUp             KEYWORD2
+tlc_shiftDown           KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+Tlc             KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+NUM_TLCS        LITERAL1
+tlc_needXLAT    LITERAL1
+tlc_GSData      LITERAL1
+tlc_onUpdateFinished    LITERAL1
+TLC_FADE_BUFFER_LENGTH  LITERAL1
+tlc_fadeBufferSize      LITERAL1
