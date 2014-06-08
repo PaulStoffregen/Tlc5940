@@ -19,14 +19,9 @@
 /** \file
     Tlc5940 class functions. */
 
-#include <avr/io.h>
-#include <avr/interrupt.h>
-
-#include "tlc_config.h"
 #include "Tlc5940.h"
+#include "pinouts/pin_functions.h"
 
-/** Pulses a pin - high then low. */
-#define pulse_pin(port, pin)   port |= _BV(pin); port &= ~_BV(pin)
 
 /** This will be true (!= 0) if update was just called and the data has not
     been latched in yet. */
@@ -58,7 +53,7 @@ uint8_t tlc_GSData[NUM_TLCS * 24];
 static uint8_t firstGSInput;
 
 /** Interrupt called after an XLAT pulse to prevent more XLAT pulses. */
-ISR(TIMER1_OVF_vect)
+static inline void Tlc5940_interrupt(void)
 {
     disable_XLAT_pulses();
     clear_XLAT_interrupt();
@@ -68,6 +63,12 @@ ISR(TIMER1_OVF_vect)
         tlc_onUpdateFinished();
     }
 }
+
+#if defined(__AVR__)
+ISR(TIMER1_OVF_vect) { Tlc5940_interrupt(); }
+#elif defined(__avr__) && defined(TEENSYDUINO)
+
+#endif
 
 /** \defgroup ReqVPRG_ENABLED Functions that Require VPRG_ENABLED
     Functions that require VPRG_ENABLED == 1.
@@ -92,18 +93,18 @@ ISR(TIMER1_OVF_vect)
 void Tlc5940::init(uint16_t initialValue)
 {
     /* Pin Setup */
-    XLAT_DDR |= _BV(XLAT_PIN);
-    BLANK_DDR |= _BV(BLANK_PIN);
-    GSCLK_DDR |= _BV(GSCLK_PIN);
+    output_pin(XLAT_DDR, XLAT_PIN);
+    output_pin(BLANK_DDR, BLANK_PIN);
+    output_pin(GSCLK_DDR, GSCLK_PIN);
 #if VPRG_ENABLED
-    VPRG_DDR |= _BV(VPRG_PIN);
-    VPRG_PORT &= ~_BV(VPRG_PIN);  // grayscale mode (VPRG low)
+    output_pin(VPRG_DDR, VPRG_PIN);
+    clear_pin(VPRG_PORT, VPRG_PIN);  // grayscale mode (VPRG low)
 #endif
 #if XERR_ENABLED
     XERR_DDR &= ~_BV(XERR_PIN);   // XERR as input
     XERR_PORT |= _BV(XERR_PIN);   // enable pull-up resistor
 #endif
-    BLANK_PORT |= _BV(BLANK_PIN); // leave blank high (until the timers start)
+    set_pin(BLANK_PORT, BLANK_PIN); // leave blank high (until the timers start)
 
     tlc_shift8_init();
 
@@ -116,7 +117,7 @@ void Tlc5940::init(uint16_t initialValue)
 
 
     /* Timer Setup */
-
+#if defined(__AVR__)
     /* Timer 1 - BLANK / XLAT */
     TCCR1A = _BV(COM1B1);  // non inverting, output on OC1B, BLANK
     TCCR1B = _BV(WGM13);   // Phase/freq correct PWM, ICR1 top
@@ -150,6 +151,10 @@ void Tlc5940::init(uint16_t initialValue)
     TCCR2B |= _BV(CS20);      // no prescale, (start pwm output)
 #endif
     TCCR1B |= _BV(CS10);      // no prescale, (start pwm output)
+
+#elif defined(__avr__) && defined(TEENSYDUINO)
+
+#endif
     update();
 }
 
@@ -304,9 +309,9 @@ uint8_t Tlc5940::readXERR(void)
 /** Sets all the bit-bang pins to output */
 void tlc_shift8_init(void)
 {
-    SIN_DDR |= _BV(SIN_PIN);   // SIN as output
-    SCLK_DDR |= _BV(SCLK_PIN); // SCLK as output
-    SCLK_PORT &= ~_BV(SCLK_PIN);
+    output_pin(SIN_DDR, SIN_PIN);   // SIN as output
+    output_pin(SCLK_DDR, SCLK_PIN); // SCLK as output
+    clear_pin(SCLK_PORT, SCLK_PIN);
 }
 
 /** Shifts a byte out, MSB first */
@@ -314,9 +319,9 @@ void tlc_shift8(uint8_t byte)
 {
     for (uint8_t bit = 0x80; bit; bit >>= 1) {
         if (bit & byte) {
-            SIN_PORT |= _BV(SIN_PIN);
+            set_pin(SIN_PORT, SIN_PIN);
         } else {
-            SIN_PORT &= ~_BV(SIN_PIN);
+            clear_pin(SIN_PORT, SIN_PIN);
         }
         pulse_pin(SCLK_PORT, SCLK_PIN);
     }
@@ -327,11 +332,11 @@ void tlc_shift8(uint8_t byte)
 /** Initializes the SPI module to double speed (f_osc / 2) */
 void tlc_shift8_init(void)
 {
-    SIN_DDR    |= _BV(SIN_PIN);    // SPI MOSI as output
-    SCLK_DDR   |= _BV(SCLK_PIN);   // SPI SCK as output
-    TLC_SS_DDR |= _BV(TLC_SS_PIN); // SPI SS as output
+    output_pin(SIN_DDR, SIN_PIN);       // SPI MOSI as output
+    output_pin(SCLK_DDR, SCLK_PIN);     // SPI SCK as output
+    output_pin(TLC_SS_DDR, TLC_SS_PIN); // SPI SS as output
 
-    SCLK_PORT &= ~_BV(SCLK_PIN);
+    clear_pin(SCLK_PORT, SCLK_PIN);
 
     SPSR = _BV(SPI2X); // double speed (f_osc / 2)
     SPCR = _BV(SPE)    // enable SPI
@@ -356,13 +361,13 @@ void tlc_dcModeStart(void)
     disable_XLAT_pulses(); // ensure that no latches happen
     clear_XLAT_interrupt(); // (in case this was called right after update)
     tlc_needXLAT = 0;
-    VPRG_PORT |= _BV(VPRG_PIN); // dot correction mode
+    set_pin(VPRG_PORT, VPRG_PIN); // dot correction mode
 }
 
 /** Switches back to grayscale mode. */
 void tlc_dcModeStop(void)
 {
-    VPRG_PORT &= ~_BV(VPRG_PIN); // back to grayscale mode
+    clear_pin(VPRG_PORT, VPRG_PIN); // back to grayscale mode
     firstGSInput = 1;
 }
 

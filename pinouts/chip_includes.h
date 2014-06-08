@@ -22,7 +22,9 @@
 /** \file
     Includes the chip-specfic defaults and pin definitions. */
 
+#ifdef __AVR__
 #include <avr/io.h>
+#endif
 
 #ifndef PB0
 #define PB0     PORTB0
@@ -109,6 +111,13 @@
 
 /* Teensy++ 2.0 */
 #include "Teensypp_xxx6.h"
+
+#elif defined (__MK20DX128__) \
+   || defined (__MK20DX256__)
+
+/* Teensy 3.0 & 3.1 */
+#include "Teensy_KinetisK20.h"
+
 
 #else
 #error "Unknown Chip!"

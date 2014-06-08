@@ -22,9 +22,10 @@
 /** \file
     Tlc5940 library header file. */
 
-#include <stdint.h>
+#include <Arduino.h>
 #include "tlc_config.h"
 
+#if defined(__AVR__)
 #ifdef TLC_ATMEGA_8_H
 
 /** Enables the Timer1 Overflow interrupt, which will fire after an XLAT
@@ -47,6 +48,19 @@
 #define enable_XLAT_pulses()    TCCR1A = _BV(COM1A1) | _BV(COM1B1)
 /** Disables the output of XLAT pulses */
 #define disable_XLAT_pulses()   TCCR1A = _BV(COM1B1)
+
+#elif defined(__arm__) && defined(TEENSYDUINO)
+
+#define set_XLAT_interrupt()    
+#define clear_XLAT_interrupt()  
+#define enable_XLAT_pulses()    
+#define disable_XLAT_pulses()   
+
+#endif
+
+
+
+
 
 extern volatile uint8_t tlc_needXLAT;
 extern volatile void (*tlc_onUpdateFinished)(void);
