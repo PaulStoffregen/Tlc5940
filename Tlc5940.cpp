@@ -65,8 +65,18 @@ static inline void Tlc5940_interrupt(void)
 }
 
 #if defined(__AVR__)
-ISR(TIMER1_OVF_vect) { Tlc5940_interrupt(); }
+ISR(TIMER1_OVF_vect)
+{
+    Tlc5940_interrupt();
+}
+
 #elif defined(__arm__) && defined(TEENSYDUINO)
+void ftm1_isr(void)
+{
+    uint32_t sc = FTM1_SC;
+    if (sc & 0x80) FTM1_SC = sc & 0x7F;
+    Tlc5940_interrupt();
+}
 
 #endif
 
@@ -152,23 +162,32 @@ void Tlc5940::init(uint16_t initialValue)
     TCCR1B |= _BV(CS10);      // no prescale, (start pwm output)
 
 #elif defined(__arm__) && defined(TEENSYDUINO)
-	SIM_SCGC4 |= SIM_SCGC4_CMT;
-	CMT_MSC = 0;
-	CMT_PPS = 0;
-	CMT_CGH1 = TLC_TIMER_TEENSY3_NORMAL_CGH1;
-	CMT_CGL1 = TLC_TIMER_TEENSY3_NORMAL_CGL1;
-	CMT_CMD1 = 1;
-	CMT_CMD2 = 0;
-	CMT_CMD3 = 0;
-	CMT_CMD4 = 0;
-	CMT_OC = 0x60;
-	CMT_MSC = 0x01;
-	CORE_PIN5_CONFIG = PORT_PCR_MUX(2)|PORT_PCR_DSE|PORT_PCR_SRE;
+    clear_pin(XLAT_DDR, XLAT_PIN);
+    SIM_SCGC4 |= SIM_SCGC4_CMT;
+    CMT_MSC = 0;
+    CMT_PPS = 0;
+    CMT_CGH1 = TLC_TIMER_TEENSY3_NORMAL_CGH1;
+    CMT_CGL1 = TLC_TIMER_TEENSY3_NORMAL_CGL1;
+    CMT_CMD1 = 1;
+    CMT_CMD2 = 0;
+    CMT_CMD3 = 0;
+    CMT_CMD4 = 0;
+    CMT_OC = 0x60;
+    CMT_MSC = 0x01;
+    CORE_PIN5_CONFIG = PORT_PCR_MUX(2)|PORT_PCR_DSE|PORT_PCR_SRE;
+    FTM1_SC = 0;
+    FTM1_MOD = TLC_TIMER_TEENSY3_NORMAL_MOD;
+    FTM1_CNT = 0;
+    FTM1_C0SC = 0x24;
+    FTM1_C1SC = 0x24;
+    FTM1_C0V = TLC_TIMER_TEENSY3_NORMAL_MOD - TLC_TIMER_TEENSY3_NORMAL_CV;
+    FTM1_C1V = TLC_TIMER_TEENSY3_NORMAL_MOD - TLC_TIMER_TEENSY3_NORMAL_CV - 1;
+    FTM1_SC = FTM_SC_CLKS(1) | FTM_SC_CPWMS;
+    NVIC_ENABLE_IRQ(IRQ_FTM1);
+    CORE_PIN4_CONFIG = PORT_PCR_MUX(3)|PORT_PCR_DSE|PORT_PCR_SRE;
 #endif
     update();
 }
-
-void cmt_isr(void) { uint8_t tmp = CMT_MSC; tmp = CMT_CMD2; }
 
 /** Clears the grayscale data array, #tlc_GSData, but does not shift in any
     data.  This call should be followed by update() if you are turning off

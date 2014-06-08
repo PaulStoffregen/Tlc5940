@@ -50,11 +50,10 @@
 #define disable_XLAT_pulses()   TCCR1A = _BV(COM1B1)
 
 #elif defined(__arm__) && defined(TEENSYDUINO)
-
-#define set_XLAT_interrupt()    
-#define clear_XLAT_interrupt()  
-#define enable_XLAT_pulses()    
-#define disable_XLAT_pulses()   
+#define set_XLAT_interrupt()    { uint32_t tmp __attribute__((unused)) = FTM1_SC; FTM1_SC = FTM_SC_CLKS(1) | FTM_SC_CPWMS | FTM_SC_TOIE; }
+#define clear_XLAT_interrupt()  FTM1_SC = FTM_SC_CLKS(1) | FTM_SC_CPWMS
+#define enable_XLAT_pulses()    CORE_PIN3_CONFIG = PORT_PCR_MUX(3)|PORT_PCR_DSE|PORT_PCR_SRE
+#define disable_XLAT_pulses()   CORE_PIN3_CONFIG = PORT_PCR_MUX(1)|PORT_PCR_DSE|PORT_PCR_SRE
 
 #endif
 
