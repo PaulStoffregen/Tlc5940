@@ -66,7 +66,7 @@ static inline void Tlc5940_interrupt(void)
 
 #if defined(__AVR__)
 ISR(TIMER1_OVF_vect) { Tlc5940_interrupt(); }
-#elif defined(__avr__) && defined(TEENSYDUINO)
+#elif defined(__arm__) && defined(TEENSYDUINO)
 
 #endif
 
@@ -101,8 +101,7 @@ void Tlc5940::init(uint16_t initialValue)
     clear_pin(VPRG_PORT, VPRG_PIN);  // grayscale mode (VPRG low)
 #endif
 #if XERR_ENABLED
-    XERR_DDR &= ~_BV(XERR_PIN);   // XERR as input
-    XERR_PORT |= _BV(XERR_PIN);   // enable pull-up resistor
+    pullup_pin(XERR_DDR, XERR_PORT, XERR_PIN); // XERR as input, enable pull-up resistor
 #endif
     set_pin(BLANK_PORT, BLANK_PIN); // leave blank high (until the timers start)
 
@@ -152,11 +151,24 @@ void Tlc5940::init(uint16_t initialValue)
 #endif
     TCCR1B |= _BV(CS10);      // no prescale, (start pwm output)
 
-#elif defined(__avr__) && defined(TEENSYDUINO)
-
+#elif defined(__arm__) && defined(TEENSYDUINO)
+	SIM_SCGC4 |= SIM_SCGC4_CMT;
+	CMT_MSC = 0;
+	CMT_PPS = 0;
+	CMT_CGH1 = TLC_TIMER_TEENSY3_NORMAL_CGH1;
+	CMT_CGL1 = TLC_TIMER_TEENSY3_NORMAL_CGL1;
+	CMT_CMD1 = 1;
+	CMT_CMD2 = 0;
+	CMT_CMD3 = 0;
+	CMT_CMD4 = 0;
+	CMT_OC = 0x60;
+	CMT_MSC = 0x01;
+	CORE_PIN5_CONFIG = PORT_PCR_MUX(2)|PORT_PCR_DSE|PORT_PCR_SRE;
 #endif
     update();
 }
+
+void cmt_isr(void) { uint8_t tmp = CMT_MSC; tmp = CMT_CMD2; }
 
 /** Clears the grayscale data array, #tlc_GSData, but does not shift in any
     data.  This call should be followed by update() if you are turning off
