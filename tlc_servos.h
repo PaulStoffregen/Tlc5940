@@ -22,7 +22,6 @@
 /** \file
     TLC servo functions. */
 
-#include <avr/io.h>
 #include "Tlc5940.h"
 
 #ifndef SERVO_MAX_ANGLE
@@ -74,6 +73,7 @@ uint8_t tlc_valToAngle(uint16_t value);
 void tlc_initServos(uint8_t initAngle)
 {
     Tlc.init(tlc_angleToVal(initAngle));
+#if defined(__AVR__)
     TCCR1B &= ~(_BV(CS12) | _BV(CS11) | _BV(CS10)); // stop timer1
     ICR1 = SERVO_TIMER1_TOP;
     TCNT1 = 0;
@@ -83,6 +83,9 @@ void tlc_initServos(uint8_t initAngle)
     TCNT2 = 0;
     OCR2 = SERVO_TIMER2_TOP / 2;
     TCCR2 = oldTCCR2;
+#elif defined(TLC_TIMER3_GSCLK)
+    // TODO: timer3 implementation needed...
+    // pull requests would be most welcome! ;-)
 #else
     uint8_t oldTCCR2B = TCCR2B;
     TCCR2B = 0;
@@ -91,6 +94,23 @@ void tlc_initServos(uint8_t initAngle)
     TCCR2B = oldTCCR2B;
 #endif
     TCCR1B |= _BV(CS11); // start timer1 with div 8 prescale
+
+#elif defined(__arm__) && defined(TEENSYDUINO)
+    //clear_XLAT_interrupt();
+    uint32_t sc = FTM1_SC;
+    FTM1_SC = 0;  // stop timer
+    CMT_MSC = 0;
+    CMT_CGH1 = TLC_TIMER_TEENSY3_SERVO_CGH1;
+    CMT_CGL1 = TLC_TIMER_TEENSY3_SERVO_CGL1;
+    CMT_MSC = 0x01; // GSCLK target is 204800 Hz
+    // TODO: this reconfiguration of FTM1 crashes... why?
+    // pull requests would be most welcome! ;-)
+    FTM1_CNT = 0;
+    FTM1_MOD = TLC_TIMER_TEENSY3_SERVO_MOD;
+    FTM1_C0V = TLC_TIMER_TEENSY3_SERVO_MOD - TLC_TIMER_TEENSY3_SERVO_CV;
+    FTM1_C1V = TLC_TIMER_TEENSY3_SERVO_MOD - TLC_TIMER_TEENSY3_SERVO_CV - 1;
+    FTM1_SC = FTM_SC_CLKS(1) | FTM_SC_CPWMS | TLC_TIMER_TEENSY3_SERVO_PS;
+#endif
 }
 
 /** Sets a servo on channel to angle.
