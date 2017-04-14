@@ -30,7 +30,7 @@
 #include "tlc_progmem_utils.h"
 
 /** The currently playing animation */
-prog_uint8_t *tlc_currentAnimation;
+const uint8_t *tlc_currentAnimation;
 /** The number of frames in the current animation */
 volatile uint16_t tlc_animationFrames;
 /** The number of PWM periods to display each frame - 1 */
@@ -39,11 +39,11 @@ volatile uint16_t tlc_animationPeriodsPerFrame;
 volatile uint16_t tlc_animationPeriodsWait;
 
 volatile void tlc_animationXLATCallback(void);
-void tlc_playAnimation(prog_uint8_t *animation, uint16_t frames, uint16_t periodsPerFrame);
+void tlc_playAnimation(const uint8_t PROGMEM *animation, uint16_t frames, uint16_t periodsPerFrame);
 
 /** \addtogroup ExtendedFunctions
     \code #include "tlc_animations.h" \endcode
-    - void tlc_playAnimation(prog_uint8_t *animation, uint16_t frames,
+    - void tlc_playAnimation(const uint8_t PROGMEM *animation, uint16_t frames,
             uint16_t periodsPerFrame) - plays an animation from progmem. */
 /* @{ */
 
@@ -55,7 +55,7 @@ void tlc_playAnimation(prog_uint8_t *animation, uint16_t frames, uint16_t period
     \param periodsPerFrame number of PWM periods to wait between each frame
            (0 means play the animation as fast as possible).
            The default PWM period for a 16MHz clock is 1.024ms. */
-void tlc_playAnimation(prog_uint8_t *animation, uint16_t frames, uint16_t periodsPerFrame)
+void tlc_playAnimation(const uint8_t PROGMEM *animation, uint16_t frames, uint16_t periodsPerFrame)
 {
     tlc_currentAnimation = animation;
     tlc_animationFrames = frames;
