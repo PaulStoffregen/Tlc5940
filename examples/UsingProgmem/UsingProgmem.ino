@@ -24,7 +24,7 @@
 
     The pattern below will only work with 1 TLC.  Copy + Paste the 4 lines
     inside the curly brackets for each additional TLC. */
-uint8_t gsArray1[NUM_TLCS * 24] PROGMEM = {
+const uint8_t gsArray1[NUM_TLCS * 24] PROGMEM = {               
   GS_DUO((4095 * 16)/16, (4095 * 15)/16), GS_DUO((4095 * 14)/16, (4095 * 13)/16),
   GS_DUO((4095 * 12)/16, (4095 * 11)/16), GS_DUO((4095 * 10)/16, (4095 * 9)/16),
   GS_DUO((4095 * 8)/16, (4095 * 7)/16), GS_DUO((4095 * 6)/16, (4095 * 5)/16),
