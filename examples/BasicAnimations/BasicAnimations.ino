@@ -40,7 +40,7 @@ void loop()
       Plays an animation in the "background".
       Don't call Tlc.update() while this is running.
       You can check if this is done with !tlc_onUpdateFinished */
-    tlc_playAnimation(ani_arduino, ANI_ARDUINO_FRAMES, 3);
+    tlc_playAnimation(ani_arduino, ANI_ARDUINO_FRAMES, 3);  // Default is 3
 
 
     // If you don't want to do anything until it's finished, use:
