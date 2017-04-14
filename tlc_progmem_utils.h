@@ -26,17 +26,17 @@
 #include "Tlc5940.h"
 #include "pinouts/pin_functions.h"
 
-void tlc_setGSfromProgmem(prog_uint8_t *gsArray);
+void tlc_setGSfromProgmem(const uint8_t PROGMEM *gsArray);
 #if VPRG_ENABLED
-void tlc_setDCfromProgmem(prog_uint8_t *dcArray);
+void tlc_setDCfromProgmem(const uint8_t PROGMEM *dcArray);
 #endif
 
 /** \addtogroup ExtendedFunctions
     \code #include "tlc_progmem_utils.h" \endcode
-    - void tlc_setGSfromProgmem(prog_uint8_t *gsArray) - copies the progmem
+    - void tlc_setGSfromProgmem(const uint8_t PROGMEM *gsArray) - copies the progmem
       grayscale to current grayscale array.  Requires a
       \link Tlc5940::update Tlc.update() \endlink.
-    - void tlc_setDCfromProgmem(prog_uint8_t *dcArray) - shifts the data from a
+    - void tlc_setDCfromProgmem(const uint8_t PROGMEM *dcArray) - shifts the data from a
       progmem dot correction array (doesn't need an update). */
 /* @{ */
 
@@ -44,7 +44,7 @@ void tlc_setDCfromProgmem(prog_uint8_t *dcArray);
     any data: call Tlc.update().  An example:
     \code
 #include "tlc_progmem_utils.h"
-prog_uint8_t gsArray1[NUM_TLCS * 24] = {
+const uint8_t PROGMEM gsArray1[NUM_TLCS * 24] = {
   GS_DUO((4095 * 16)/16, (4095 * 15)/16), GS_DUO((4095 * 14)/16, (4095 * 13)/16),
   GS_DUO((4095 * 12)/16, (4095 * 11)/16), GS_DUO((4095 * 10)/16, (4095 * 9)/16),
   GS_DUO((4095 * 8)/16, (4095 * 7)/16), GS_DUO((4095 * 6)/16, (4095 * 5)/16),
@@ -62,9 +62,9 @@ Tlc.update();
     The format of the grayscale array is explained in #tlc_GSData.
 
     \param gsArray A progmem array of grayscale data. */
-void tlc_setGSfromProgmem(prog_uint8_t *gsArray)
+void tlc_setGSfromProgmem(const uint8_t PROGMEM *gsArray)
 {
-    prog_uint8_t *gsArrayp = gsArray;
+    const uint8_t PROGMEM *gsArrayp = gsArray;
     uint8_t *gsDatap = tlc_GSData;
     while (gsDatap < tlc_GSData + NUM_TLCS * 24) {
         *gsDatap++ = pgm_read_byte(gsArrayp++);
@@ -78,14 +78,14 @@ void tlc_setGSfromProgmem(prog_uint8_t *gsArray)
 
 /** \addtogroup ReqVPRG_ENABLED
     From tlc_progmem_utils.h:
-    - tlc_setDCfromProgmem(prog_uint8_t *dcArray) - shifts the data from a
+    - tlc_setDCfromProgmem(const uint8_t PROGMEM *dcArray) - shifts the data from a
       progmem dot correction array (doesn't need an update). */
 /* @{ */
 
 /** Sets the dot correction data from an array in progmem.  An example:
     \code
 #include "tlc_progmem_utils.h"
-prog_uint8_t dcArray1[NUM_TLCS * 12] = {
+const uint8_t PROGMEM dcArray1[NUM_TLCS * 12] = {
   DC_QUARTET(32, 63, 32, 63), DC_QUARTET(32, 63, 32, 63),
   DC_QUARTET(32, 63, 32, 63), DC_QUARTET(32, 63, 32, 63),
 };
@@ -103,12 +103,12 @@ tlc_setDCfromProgmem(dcArray1);
 
     \param dcArray A progmem array of dot correction data to be shifted out.
     \see \link Tlc5940::setAllDC Tlc.setAllDC \endlink */
-void tlc_setDCfromProgmem(prog_uint8_t *dcArray)
+void tlc_setDCfromProgmem(const uint8_t PROGMEM *dcArray)
 {
     tlc_dcModeStart();
 
-    prog_uint8_t *p = dcArray;
-    prog_uint8_t *dcArrayEnd = dcArray + NUM_TLCS * 12;
+    const uint8_t PROGMEM *p = dcArray;
+    const uint8_t PROGMEM *dcArrayEnd = dcArray + NUM_TLCS * 12;
     while (p < dcArrayEnd) {
         tlc_shift8(pgm_read_byte(p++));
     }
