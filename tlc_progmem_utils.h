@@ -26,9 +26,9 @@
 #include "Tlc5940.h"
 #include "pinouts/pin_functions.h"
 
-void tlc_setGSfromProgmem(const uint8_t PROGMEM *gsArray);
+void tlc_setGSfromProgmem(const uint8_t /*PROGMEM*/ *gsArray);
 #if VPRG_ENABLED
-void tlc_setDCfromProgmem(const uint8_t PROGMEM *dcArray);
+void tlc_setDCfromProgmem(const uint8_t /*PROGMEM*/ *dcArray);
 #endif
 
 /** \addtogroup ExtendedFunctions
@@ -62,9 +62,9 @@ Tlc.update();
     The format of the grayscale array is explained in #tlc_GSData.
 
     \param gsArray A progmem array of grayscale data. */
-void tlc_setGSfromProgmem(const uint8_t PROGMEM *gsArray)
+void tlc_setGSfromProgmem(const uint8_t /*PROGMEM*/ *gsArray)
 {
-    const uint8_t PROGMEM *gsArrayp = gsArray;
+    const uint8_t /*PROGMEM*/ *gsArrayp = gsArray;
     uint8_t *gsDatap = tlc_GSData;
     while (gsDatap < tlc_GSData + NUM_TLCS * 24) {
         *gsDatap++ = pgm_read_byte(gsArrayp++);
