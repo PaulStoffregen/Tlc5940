@@ -97,7 +97,7 @@ void tlc_initServos(uint8_t initAngle)
 
 #elif defined(__arm__) && defined(TEENSYDUINO)
     //clear_XLAT_interrupt();
-    uint32_t sc = FTM1_SC;
+    uint32_t sc __attribute__ ((unused)) = FTM1_SC;
     FTM1_SC = 0;  // stop timer
     CMT_MSC = 0;
     CMT_CGH1 = TLC_TIMER_TEENSY3_SERVO_CGH1;
