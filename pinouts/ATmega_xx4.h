@@ -16,8 +16,8 @@
     along with The Arduino TLC5940 Library.  If not, see
     <http://www.gnu.org/licenses/>. */
 
-#ifndef TLC_ATMEGA_XX8_H
-#define TLC_ATMEGA_XX8_H
+#ifndef TLC_ATMEGA_XX4_H
+#define TLC_ATMEGA_XX4_H
 
 /** \file
     SPI and timer pins for the ATmega164/324/644.  Don't edit these.  All
