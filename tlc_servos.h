@@ -133,7 +133,7 @@ uint8_t tlc_getServo(TLC_CHANNEL_TYPE channel)
 uint16_t tlc_angleToVal(uint8_t angle)
 {
     return 4095 - SERVO_MIN_WIDTH - (
-            ((uint16_t)(angle) * (uint16_t)(SERVO_MAX_WIDTH - SERVO_MIN_WIDTH))
+            ((uint16_t)(angle) * (uint32_t)(SERVO_MAX_WIDTH - SERVO_MIN_WIDTH))
             / SERVO_MAX_ANGLE);
 }
 
