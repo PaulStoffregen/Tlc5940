@@ -22,6 +22,8 @@
     -  +5V from Arduino -> TLC pin 21 and 19     (VCC and DCPRG)
     -  GND from Arduino -> TLC pin 22 and 27     (GND and VPRG)
     -  digital 3        -> TLC pin 18            (GSCLK)
+       Note: on Atmega32U4-based boards (like Arduino Leonardo), the pin OC3A
+       should be used instead, i.e. digital 5.
     -  digital 9        -> TLC pin 24            (XLAT)
     -  digital 10       -> TLC pin 23            (BLANK)
     -  digital 11       -> TLC pin 26            (SIN)
