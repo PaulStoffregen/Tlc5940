@@ -120,6 +120,10 @@
 /* Teensy 3.0 & 3.1 & 3.2 & 3.5 & 3.6*/
 #include "Teensy_KinetisK20.h"
 
+#elif defined (__IMXRT1062__)
+
+/* Teensy 4.0, 4.1, MicroMod */
+#include "Teensy_IMXRT.h"
 
 #else
 #error "Unknown Chip!"

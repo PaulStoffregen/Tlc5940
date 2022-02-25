@@ -8,7 +8,9 @@
   #define output_pin(ddr, pin)        ddr |= _BV(pin)
   #define pullup_pin(ddr, port, pin)  ddr &= ~_BV(pin); port |= _BV(pin)
 #elif defined(TEENSYDUINO)
-  #if F_CPU > 48000000
+  #if F_CPU > 120000000
+  #define pulse_pin(port, pin)        delayNanoseconds(10); digitalWriteFast(pin, HIGH); delayNanoseconds(20); digitalWriteFast(pin, LOW)
+  #elif F_CPU > 48000000
   #define pulse_pin(port, pin)        digitalWriteFast(pin, HIGH); asm("nop"); digitalWriteFast(pin, LOW)
   #else
   #define pulse_pin(port, pin)        digitalWriteFast(pin, HIGH); digitalWriteFast(pin, LOW)

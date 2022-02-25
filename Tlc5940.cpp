@@ -71,13 +71,20 @@ ISR(TIMER1_OVF_vect)
 }
 
 #elif defined(__arm__) && defined(TEENSYDUINO)
+#if defined(__IMXRT1062__)
+void flexpwm42_isr(void)
+{
+    FLEXPWM4_SM2STS = FLEXPWM_SMSTS_RF;
+    Tlc5940_interrupt();
+}
+#else
 void ftm1_isr(void)
 {
     uint32_t sc = FTM1_SC;
     if (sc & 0x80) FTM1_SC = sc & 0x7F;
     Tlc5940_interrupt();
 }
-
+#endif
 #endif
 
 /** \defgroup ReqVPRG_ENABLED Functions that Require VPRG_ENABLED
@@ -162,6 +169,31 @@ void Tlc5940::init(uint16_t initialValue)
     TCCR1B |= _BV(CS10);      // no prescale, (start pwm output)
 
 #elif defined(__arm__) && defined(TEENSYDUINO)
+ #if defined(__IMXRT1062__)
+    /* Teensy 4.0, 4.1, MicroMod */
+    clear_pin(XLAT_DDR, XLAT_PIN);
+    analogWriteFrequency(5, 4000000);
+    analogWrite(5, 128);
+    const uint32_t newdiv = (uint32_t)((float)F_BUS_ACTUAL / 4 / 1000 + 0.5f);
+    FLEXPWM4_MCTRL |= FLEXPWM_MCTRL_CLDOK(4);
+    FLEXPWM4_SM2CTRL = FLEXPWM_SMCTRL_FULL | FLEXPWM_SMCTRL_PRSC(2); // 3146
+    FLEXPWM4_SM2VAL0 = newdiv - 1;
+    FLEXPWM4_SM2VAL1 = newdiv - 1;
+    FLEXPWM4_SM2VAL2 = newdiv - 7; // pin 2 = FlexPWM4_2_A = BLANK
+    FLEXPWM4_SM2VAL3 = newdiv - 1;
+    FLEXPWM4_SM2VAL4 = newdiv - 6; // pin 3 = FlexPWM4_2_B = XLAT
+    FLEXPWM4_SM2VAL5 = newdiv - 2;
+    FLEXPWM4_OUTEN = FLEXPWM_OUTEN_PWMA_EN(4) | FLEXPWM_OUTEN_PWMB_EN(4);
+    FLEXPWM4_MCTRL |= FLEXPWM_MCTRL_LDOK(4);
+    CORE_PIN2_CONFIG = 1;
+    CORE_PIN2_PADCONFIG = IOMUXC_PAD_DSE(7);
+    CORE_PIN3_PADCONFIG = IOMUXC_PAD_DSE(7);
+    FLEXPWM4_SM2INTEN = 0;
+    FLEXPWM4_SM2STS = 0x3FFF;
+    attachInterruptVector(IRQ_FLEXPWM4_2, flexpwm42_isr);
+    NVIC_ENABLE_IRQ(IRQ_FLEXPWM4_2);
+ #else
+    /* Teensy 3.0, 3.1, 3.2, 3.5, 3.6 */
     clear_pin(XLAT_DDR, XLAT_PIN);
     SIM_SCGC4 |= SIM_SCGC4_CMT;
     CMT_MSC = 0;
@@ -185,6 +217,7 @@ void Tlc5940::init(uint16_t initialValue)
     FTM1_SC = FTM_SC_CLKS(1) | FTM_SC_CPWMS;
     NVIC_ENABLE_IRQ(IRQ_FTM1);
     CORE_PIN4_CONFIG = PORT_PCR_MUX(3)|PORT_PCR_DSE|PORT_PCR_SRE;
+ #endif
 #endif
     update();
 }
