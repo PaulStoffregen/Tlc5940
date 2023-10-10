@@ -25,6 +25,16 @@
 #include <Arduino.h>
 #include "tlc_config.h"
 
+#define min(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+	 
+#define max(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+
 #if defined(__AVR__)
 #ifdef TLC_ATMEGA_8_H
 
@@ -71,23 +81,42 @@
 extern volatile uint8_t tlc_needXLAT;
 extern volatile void (*tlc_onUpdateFinished)(void);
 extern uint8_t tlc_GSData[NUM_TLCS * 24];
+extern uint8_t tlc_DCData[NUM_TLCS * 12];
 
 /** The main Tlc5940 class for the entire library.  An instance of this class
     will be preinstantiated as Tlc. */
 class Tlc5940
 {
   public:
-    void init(uint16_t initialValue = 0);
+    void init(	uint16_t initialValue = 0,
+				int sin = DEFAULT_TLC_MOSI_PIN,
+				int sout = DEFAULT_TLC_MISO_PIN,
+				int sclk = DEFAULT_TLC_SCK_PIN,
+				int xlat = DEFAULT_XLAT_PIN,
+				int blank = DEFAULT_BLANK_PIN,
+				int gsclk = DEFAULT_GSCLK_PIN,
+				int vprg = DEFAULT_VPRG_PIN,
+				int xerr = DEFAULT_XERR_PIN );
     void clear(void);
     uint8_t update(void);
     void set(TLC_CHANNEL_TYPE channel, uint16_t value);
     uint16_t get(TLC_CHANNEL_TYPE channel);
     void setAll(uint16_t value);
 #if VPRG_ENABLED
-    void setAllDC(uint8_t value);
+    void updateDC(void);
+	void setDC(TLC_CHANNEL_TYPE channel, uint8_t value);
+	uint8_t getDC(TLC_CHANNEL_TYPE channel);
+	void setAllDC(uint8_t value);
 #endif
 #if XERR_ENABLED
     uint8_t readXERR(void);
+#endif
+#if defined (ARDUINO_ARCH_ESP32)
+	volatile int TLC5940_xlat_enabled = 0;
+	volatile int TLC5940_interrupt_enabled = 0;
+	
+	void XLAT_mode(int val);
+	void INT_mode(int val);
 #endif
 
 };
@@ -102,6 +131,13 @@ void tlc_dcModeStop(void);
 
 // for the preinstantiated Tlc variable.
 extern Tlc5940 Tlc;
+
+#if defined (ARDUINO_ARCH_ESP32)
+#define set_XLAT_interrupt()    Tlc.XLAT_mode(1)
+#define clear_XLAT_interrupt()  Tlc.XLAT_mode(0)
+#define enable_XLAT_pulses()    Tlc.INT_mode(1)
+#define disable_XLAT_pulses()   Tlc.INT_mode(0)
+#endif
 
 #endif
 

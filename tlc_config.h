@@ -53,7 +53,7 @@
     are attached normally.
     \note Each TLC needs it's own IREF resistor */
 #ifndef NUM_TLCS
-#define NUM_TLCS    1
+#define NUM_TLCS    2
 #endif
 
 /** Determines how data should be transfered to the TLCs.  Bit-banging can use
