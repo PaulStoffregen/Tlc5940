@@ -22,6 +22,7 @@
 #include "Tlc5940.h"
 #include "pinouts/pin_functions.h"
 
+
 int sin_pin;
 int sout_pin;
 int sclk_pin;
@@ -56,6 +57,9 @@ volatile void (*tlc_onUpdateFinished)(void);
           situation, shifting the data out is really fast because the format of
           the array is the same as the format of the TLC's serial interface. */
 uint8_t tlc_GSData[NUM_TLCS * 24];
+
+/** Packed DOT Correction data, 12 bytes (16 * 6 bits) per TLC. */
+uint8_t tlc_DCData[NUM_TLCS * 12];
 
 /** Don't add an extra SCLK pulse after switching from dot-correction mode. */
 static uint8_t firstGSInput;
@@ -118,6 +122,12 @@ void IRAM_ATTR TLC5940_onTimer()
 	if (interrupt_enabled)
 		Tlc5940_interrupt();
 }
+#endif
+
+#if defined (ARDUINO_ARCH_ESP32)
+// SPI to send gray-scale data
+const uint32_t TLC5940_SPI_CLK = 8000000;  // 8MHz
+SPIClass* TLC5940_vspi = NULL;
 #endif
 
 /** \defgroup ReqVPRG_ENABLED Functions that Require VPRG_ENABLED
@@ -341,7 +351,10 @@ uint8_t Tlc5940::update(void)
         firstGSInput = 0;
     } else {
 #if defined (ARDUINO_ARCH_ESP32)
+		TLC5940_vspi->end();	// Release SCLK pin
+		output_pin(sclk_pin);
 		pulse_pin(sclk_pin);
+		TLC5940_vspi->begin(sclk_pin, sout_pin, sin_pin, -1);
 #elif
         pulse_pin(SCLK_PORT, SCLK_PIN);
 #endif
@@ -447,6 +460,14 @@ void Tlc5940::updateDC(void)
         tlc_shift8(*p++);
         tlc_shift8(*p++);
     }
+	
+	// dot correction data latch
+#if defined (ARDUINO_ARCH_ESP32)
+	pulse_pin(xlat_pin); 
+#elif
+    pulse_pin(XLAT_PORT, XLAT_PIN);
+#endif
+
     tlc_dcModeStop();
 }
 
@@ -498,7 +519,7 @@ void Tlc5940::setAllDC(uint8_t value)
     uint8_t firstByte = value << 2 | value >> 4;
     uint8_t secondByte = value << 4 | value >> 2;
     uint8_t thirdByte = value << 6 | value;
-	
+	uint8_t *p = tlc_DCData;
 	while (p < tlc_DCData + NUM_TLCS * 12) {
         *p++ = firstByte;
         *p++ = secondByte;
@@ -566,10 +587,6 @@ void tlc_shift8(uint8_t byte)
  #if defined (ARDUINO_ARCH_ESP32)
  
 /** Initializes the SPI module */
-
-// SPI to send gray-scale data
-const uint32_t TLC5940_SPI_CLK = 8000000;  // 8MHz
-SPIClass* TLC5940_vspi = NULL;
 
 void tlc_shift8_init(void)
 {

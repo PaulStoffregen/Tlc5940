@@ -108,7 +108,7 @@
     - 1 VPRG is connected
     \note VPRG to GND inputs grayscale data, VPRG to Vcc inputs dot-correction
           data */
-#define VPRG_ENABLED    0
+#define VPRG_ENABLED    1
 
 /** Enables/disables XERR (TLC pin 16) functionality to check for shorted/broken
     LEDs

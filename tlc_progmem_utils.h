@@ -103,18 +103,15 @@ tlc_setDCfromProgmem(dcArray1);
 
     \param dcArray A progmem array of dot correction data to be shifted out.
     \see \link Tlc5940::setAllDC Tlc.setAllDC \endlink */
-void tlc_setDCfromProgmem(const uint8_t PROGMEM *dcArray)
+void tlc_setDCfromProgmem(const uint8_t /*PROGMEM*/ *dcArray)
 {
-    tlc_dcModeStart();
-
-    const uint8_t PROGMEM *p = dcArray;
-    const uint8_t PROGMEM *dcArrayEnd = dcArray + NUM_TLCS * 12;
-    while (p < dcArrayEnd) {
-        tlc_shift8(pgm_read_byte(p++));
+	const uint8_t /*PROGMEM*/ *dcArrayp = dcArray;
+    uint8_t *dcDatap = tlc_DCData;
+    while (dcDatap < tlc_DCData + NUM_TLCS * 12) {
+        *dcDatap++ = pgm_read_byte(dcArrayp++);
+        *dcDatap++ = pgm_read_byte(dcArrayp++);
+        *dcDatap++ = pgm_read_byte(dcArrayp++);
     }
-    pulse_pin(XLAT_PORT, XLAT_PIN);
-
-    tlc_dcModeStop();
 }
 
 /* @} */
