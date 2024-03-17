@@ -19,6 +19,12 @@
   #define clear_pin(port, pin)        digitalWriteFast(pin, LOW)
   #define output_pin(ddr, pin)        pinMode(pin, OUTPUT)
   #define pullup_pin(ddr, port, pin)  pinMode(pin, INPUT_PULLUP)
+#elif defined (ARDUINO_ARCH_ESP32)
+  #define pulse_pin(pin)              digitalWrite(pin, HIGH); digitalWrite(pin, LOW)
+  #define set_pin(pin)          	  digitalWrite(pin, HIGH)
+  #define clear_pin(pin)        	  digitalWrite(pin, LOW)
+  #define output_pin(pin)        	  pinMode(pin, OUTPUT)
+  #define pullup_pin(pin)  			  pinMode(pin, INPUT_PULLUP)
 #else
   #define pulse_pin(port, pin)        digitalWrite(pin, HIGH); digitalWrite(pin, LOW)
   #define set_pin(port, pin)          digitalWrite(pin, HIGH)

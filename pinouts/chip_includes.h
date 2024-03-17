@@ -125,6 +125,11 @@
 /* Teensy 4.0, 4.1, MicroMod */
 #include "Teensy_IMXRT.h"
 
+#elif defined (ARDUINO_ARCH_ESP32)
+
+#include "Espressif_ESP32.h"
+#include <SPI.h>
+
 #else
 #error "Unknown Chip!"
 #endif

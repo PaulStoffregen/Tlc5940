@@ -22,7 +22,9 @@
 /** \file
     TLC fading functions. */
 
+#if !defined (ARDUINO_ARCH_ESP32)
 #include <avr/interrupt.h>
+#endif
 
 #include "Tlc5940.h"
 

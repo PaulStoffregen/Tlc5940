@@ -53,7 +53,7 @@
     are attached normally.
     \note Each TLC needs it's own IREF resistor */
 #ifndef NUM_TLCS
-#define NUM_TLCS    1
+#define NUM_TLCS    2
 #endif
 
 /** Determines how data should be transfered to the TLCs.  Bit-banging can use
@@ -108,7 +108,7 @@
     - 1 VPRG is connected
     \note VPRG to GND inputs grayscale data, VPRG to Vcc inputs dot-correction
           data */
-#define VPRG_ENABLED    0
+#define VPRG_ENABLED    1
 
 /** Enables/disables XERR (TLC pin 16) functionality to check for shorted/broken
     LEDs

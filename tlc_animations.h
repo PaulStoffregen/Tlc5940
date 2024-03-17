@@ -22,8 +22,10 @@
 /** \file
     TLC Animation functions.  These play animations from PROGMEM. */
 
+#if !defined (ARDUINO_ARCH_ESP32)
 #include <avr/pgmspace.h>
 #include <avr/io.h>
+#endif
 
 #include "tlc_config.h"
 #include "Tlc5940.h"

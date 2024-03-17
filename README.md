@@ -1,3 +1,11 @@
+Fork of https://github.com/PaulStoffregen/Tlc5940 with ESP32 support
+
+Tested on ESP32, but should work on ESP32-S2, S3, etc. with no or minimal mods
+Requires the following board support package in Arduino IDE (Tools -> Board -> Boards Manager…): esp32 by Espressif Systems
+
+DOT Correction can be set for each channel individually.
+Animation doesn't work as PROGMEM snippets for ESP32 were not finished.
+
 # Tlc5940 Library
 
 16 channel PWM LED driver based on the Texas Instruments TLC5940 chip.
